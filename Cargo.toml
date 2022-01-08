@@ -1,11 +1,11 @@
 [package]
-name = "keller-licht"
+name = "homeautomation-rust"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-tokio-modbus = "*"
+tokio-modbus = { version = "*", default-features = false, features = ["rtu"] }
 tokio-serial = { version = "5.4" }
 tokio = { version = "1.15.0", features = ["full"] }
