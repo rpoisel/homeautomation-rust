@@ -23,16 +23,16 @@ def main():
 
     relay_states = 0
     log.debug("Reading Holding Registers")
-    rr = client.read_holding_registers(0x00c0, 1, unit=2)
+    rr = client.read_discrete_inputs(0x0000, 0x0010, unit=1)
     log.debug(rr)
-    last_input_states = rr.registers[0]
+    last_input_states = rr.getBit(0)
     while True:
         log.debug("Reading Holding Registers")
-        rr = client.read_holding_registers(0x00c0, 1, unit=2)
+        rr = client.read_discrete_inputs(0x0000, 0x0010, unit=1)
         log.debug(rr)
         if rr.isError():
             continue
-        input_states = rr.registers[0]
+        input_states = rr.getBit(0)
         for cur in range(0, 8):
             mask = 0x01 << cur
             if last_input_states & mask == 0 and input_states & mask == mask:
