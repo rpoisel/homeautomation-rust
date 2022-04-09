@@ -184,7 +184,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "homeautomation-rust"
+name = "homeautomation"
 version = "0.1.0"
 dependencies = [
  "tokio",

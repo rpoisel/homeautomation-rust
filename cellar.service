@@ -2,7 +2,7 @@
 Description=Homeautomation Rust
 
 [Service]
-ExecStart=/home/rpoisel/tmp/homeautomation-rust
+ExecStart=/home/rpoisel/tmp/cellar
 Restart=always
 RestartSec=5s
 User=rpoisel
