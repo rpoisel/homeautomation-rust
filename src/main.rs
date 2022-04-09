@@ -17,9 +17,9 @@ pub async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut interval = time::interval(Duration::from_millis(50));
 
     let mut states_do = Vec::from([false, false, false, false, false, false, false, false]);
-    let mut states_prev_di = ctx_di.read_discrete_inputs(0x0000, 8).await?;
+    let mut states_prev_di = ctx_di.read_discrete_inputs(0x0008, 8).await?;
     loop {
-        let states_di = ctx_di.read_discrete_inputs(0x0000, 8).await?;
+        let states_di = ctx_di.read_discrete_inputs(0x0008, 8).await?;
 
         for cur in 0..=7 {
             if !(states_di[cur] && !states_prev_di[cur]) {
