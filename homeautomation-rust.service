@@ -1,0 +1,12 @@
+[Unit]
+Description=Homeautomation Rust
+
+[Service]
+ExecStart=/home/rpoisel/tmp/homeautomation-rust
+Restart=always
+RestartSec=5s
+User=rpoisel
+Group=rpoisel
+
+[Install]
+WantedBy=multi-user.target
