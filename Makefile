@@ -10,6 +10,7 @@ prepare:
 	sudo apt install gcc-arm-linux-gnueabihf
 
 .PHONY: build-native
+all: build-native
 build-native:
 	cargo build --release
 	@for i in cellar roof; do \
