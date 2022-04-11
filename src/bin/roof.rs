@@ -6,38 +6,50 @@
 // option.  This file may not be copied, modified, or distributed
 // except according to those terms.extern crate i2cdev;
 
+mod automation;
+mod bitop;
+use crate::automation::*;
+use crate::bitop::*;
+
 extern crate docopt;
 extern crate i2cdev;
 
-#[cfg(any(target_os = "linux", target_os = "android"))]
 use i2cdev::core::{I2CMessage, I2CTransfer};
-#[cfg(any(target_os = "linux", target_os = "android"))]
 use i2cdev::linux::{LinuxI2CBus, LinuxI2CMessage};
 
 use docopt::Docopt;
 use std::env::args;
 
-const USAGE: &str = "
-Reads registers from a PCA9956B IC via Linux i2cdev.
+use std::{thread, time};
 
-Assumes the PCA9956B is using address 0x20.
+const USAGE: &str = "
+This executable contains the logic of the roof floor.
 
 Usage:
-  pca9956b <device>
-  pca9956b (-h | --help)
-  pca9956b --version
+  roof <device>
+  roof (-h | --help)
+  roof --version
 
 Options:
   -h --help    Show this help text.
   --version    Show version.
 ";
 
-const ADDR: u16 = 0x20;
+// root@raspberry-d:~# i2cdetect -y 1
+//      0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
+// 00:                         -- -- -- -- -- -- -- --
+// 10: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+// 20: 20 -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+// 30: -- -- -- -- -- -- -- -- 38 39 3a 3b -- -- -- --
+// 40: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+// 50: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+// 60: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+// 70: -- -- -- -- -- -- -- --
 
-#[cfg(not(any(target_os = "linux", target_os = "android")))]
-fn main() {}
+// address of the MAX7311 chip (outputs)
+const _ADDR_MAX7311: u16 = 0x20;
+const ADDR_PCF8574: u16 = 0x38;
 
-#[cfg(any(target_os = "linux", target_os = "android"))]
 fn main() {
     let args = Docopt::new(USAGE)
         .and_then(|d| d.argv(args()).parse())
@@ -52,31 +64,51 @@ fn main() {
     };
     println!("Opened I2C Bus OK: {}", path);
 
-    // Build two I2C messages:
-    // 1) Write the MODE1 register address, with top bit indcating auto-
-    //    increment should be enabled
-    // 2) Read 10 bytes from the current register onwards
-    let mut data = [0; 10];
-    let mut msgs = [
-        LinuxI2CMessage::write(&[0b1000_0000]).with_address(ADDR),
-        LinuxI2CMessage::read(&mut data).with_address(ADDR),
-    ];
+    let mut blind = Blind::new();
 
-    // Send the messages to the kernel to process
-    match bus.transfer(&mut msgs) {
-        Ok(rc) => println!("Successful transfer call: {} messages processed", rc),
-        Err(_e) => {
-            println!("Error reading/writing {}", _e);
-            return;
+    loop {
+        // read inputs
+        let mut data = [0; 1];
+        let mut msgs = [LinuxI2CMessage::read(&mut data).with_address(ADDR_PCF8574)];
+
+        // Send the messages to the kernel to process
+        match bus.transfer(&mut msgs) {
+            Ok(rc) => println!("Successful transfer call: {} messages processed", rc),
+            Err(_e) => {
+                println!("Error reading/writing {}", _e);
+                return; // continue
+            }
         }
-    }
 
-    // Print the data read from the device.  A recently reset PCA9956B should
-    // return:
-    // 0x8005000000000000ff00
-    let mut output = "Result: 0x".to_string();
-    for byte in &data {
-        output = format!("{}{:02x}", output, byte);
+        // Print the data read from the device.  A recently reset root should
+        // return:
+        // 0x8005000000000000ff00
+        let mut output = "Result: 0x".to_string();
+        for byte in &data {
+            output = format!("{}{:02x}", output, byte);
+        }
+        println!("{}", output);
+
+        let input = BitValue { val: data[0] };
+        let (_out1, _out2) = blind.update(
+            time::Instant::now(),
+            input.val.bit_is_set(0),
+            input.val.bit_is_set(1),
+        );
+
+        // // write outputs
+        // msgs = [LinuxI2CMessage::write(&[0b1000_0000]).with_address(ADDR_MAX7311)];
+
+        // // Send the messages to the kernel to process
+        // match bus.transfer(&mut msgs) {
+        //     Ok(rc) => println!("Successful transfer call: {} messages processed", rc),
+        //     Err(_e) => {
+        //         println!("Error reading/writing {}", _e);
+        //         return;
+        //     }
+        // }
+
+        let ten_millis = time::Duration::from_millis(20);
+        thread::sleep(ten_millis);
     }
-    println!("{}", output);
 }

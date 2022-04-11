@@ -9,6 +9,10 @@ prepare:
 	rustup target add armv7-unknown-linux-gnueabihf
 	sudo apt install gcc-arm-linux-gnueabihf
 
+.PHONY: test
+test:
+	cargo test
+
 .PHONY: build-native
 all: build-native
 build-native:
