@@ -6,8 +6,9 @@ endif
 
 .PHONY: prepare
 prepare:
+	sudo apt install -yy gcc-arm-linux-gnueabihf gcc-aarch64-linux-gnu
 	rustup target add armv7-unknown-linux-gnueabihf
-	sudo apt install gcc-arm-linux-gnueabihf
+	rustup target add aarch64-unknown-linux-gnu
 
 .PHONY: test
 test:
@@ -25,8 +26,8 @@ build-native:
 .PHONY: build-rasppi
 all: build-rasppi
 build-rasppi:
-	cargo build --target=armv7-unknown-linux-gnueabihf --release
+	cargo build --target=aarch64-unknown-linux-gnu --release
 	@for i in cellar roof; do \
-		arm-linux-gnueabihf-strip -s "target/armv7-unknown-linux-gnueabihf/release/$$i"; \
-		arm-linux-gnueabihf-size "target/armv7-unknown-linux-gnueabihf/release/$$i"; \
+		aarch64-linux-gnu-strip -s "target/aarch64-unknown-linux-gnu/release/$$i"; \
+		aarch64-linux-gnu-size "target/aarch64-unknown-linux-gnu/release/$$i"; \
 	done
