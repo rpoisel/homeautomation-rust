@@ -1,10 +1,4 @@
-// Copyright 2018, Piers Finlayson <piers@piersandkatie.com>
-//
-// Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
-// http://www.apache.org/license/LICENSE-2.0> or the MIT license
-// <LICENSE-MIT or http://opensource.org/licenses/MIT>, at your
-// option.  This file may not be copied, modified, or distributed
-// except according to those terms.extern crate i2cdev;
+#![crate_name = "roof"]
 
 mod automation;
 mod bitop;
@@ -90,11 +84,14 @@ fn main() {
         println!("{}", output);
 
         let input = BitValue { val: data[0] };
-        let (_out1, _out2) = blind.update(
+        match blind.update(
             time::Instant::now(),
             input.val.bit_is_set(0),
             input.val.bit_is_set(1),
-        );
+        ) {
+            None => println!("Whatever"),
+            Some((up, down)) => println!("{}, {}", up, down),
+        }
 
         // // write outputs
         // msgs = [LinuxI2CMessage::write(&[0b1000_0000]).with_address(ADDR_MAX7311)];

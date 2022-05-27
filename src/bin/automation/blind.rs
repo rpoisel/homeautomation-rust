@@ -1,46 +1,60 @@
 use std::time::Instant;
 
-pub trait State {
-    fn next(self: Box<Self>) -> (Box<dyn State>, bool, bool);
+trait State {
+    fn next(self: Box<Self>, _up: bool, _down: bool) -> (Box<dyn State>, bool, bool);
+    fn name(&self) -> &'static str;
 }
 
-pub struct StateIdle {
-    up: bool,
-    down: bool,
+struct StateIdle {
+    // up: bool,
+// down: bool,
 }
 
 impl State for StateIdle {
-    fn next(self: Box<Self>) -> (Box<dyn State>, bool, bool) {
-        (
-            // Box::new(StateIdle {
-            //     up: self.up,
-            //     down: self.down,
-            // }),
+    fn next(self: Box<Self>, _up: bool, _down: bool) -> (Box<dyn State>, bool, bool) {
+        // Box::new(StateIdle {
+        //     up: self.up,
+        //     down: self.down,
+        // }),
 
-            // self, self.up, self.down,
-            self, false, false,
-        )
+        // self, self.up, self.down,
+        (self, false, false)
+    }
+    fn name(&self) -> &'static str {
+        "idle"
     }
 }
 
+/// A representation of a window blind
+///
+/// Directly forward states of inputs into instances using the update method.
+/// Any edge detection will be performed within the blind instances themselves.
 pub struct Blind {
-    state: Box<dyn State>,
+    state: Option<Box<dyn State>>,
 }
 
 impl Blind {
     pub fn new() -> Self {
         Blind {
-            state: Box::new(StateIdle {
-                up: false,
-                down: false,
-            }),
+            state: Some(Box::new(StateIdle {})),
         }
     }
 
-    pub fn update(&mut self, _now: Instant, _in1: bool, _in2: bool) -> (bool, bool) {
-        // let (newstate, up, down) = self.state.next();
-        // self.state = newstate;
-        // (up, down)
-        (false, false)
+    pub fn update(&mut self, _now: Instant, up: bool, down: bool) -> Option<(bool, bool)> {
+        if let Some(s) = self.state.take() {
+            let (nextstate, new_up, new_down) = s.next(up, down);
+            self.state = Some(nextstate);
+            return Some((new_up, new_down));
+        }
+        None
+    }
+
+    // Currently, this method only exists for tests
+    // I simply don't know how to do it any better yet :-)
+    pub fn state(&self) -> &'static str {
+        match &self.state {
+            Some(s) => s.name(),
+            None => "none",
+        }
     }
 }
