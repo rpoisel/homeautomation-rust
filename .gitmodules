@@ -1,3 +1,15 @@
 [submodule "cpp/libmodbuspp"]
 	path = cpp/modbus/libmodbuspp
 	url = https://github.com/rpoisel/libmodbuspp.git
+[submodule "cpp/reference/deps/Catch2"]
+	path = cpp/reference/deps/Catch2
+	url = https://github.com/catchorg/Catch2.git
+[submodule "cpp/reference/deps/spdlog"]
+	path = cpp/reference/deps/spdlog
+	url = https://github.com/gabime/spdlog.git
+[submodule "cpp/reference/deps/GSL"]
+	path = cpp/reference/deps/GSL
+	url = https://github.com/microsoft/GSL.git
+[submodule "cpp/reference/deps/CLI11"]
+	path = cpp/reference/deps/CLI11
+	url = https://github.com/CLIUtils/CLI11.git
