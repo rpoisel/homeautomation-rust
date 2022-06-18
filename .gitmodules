@@ -1,3 +1,3 @@
 [submodule "cpp/libmodbuspp"]
-	path = cpp/libmodbuspp
+	path = cpp/modbus/libmodbuspp
 	url = https://github.com/rpoisel/libmodbuspp.git
