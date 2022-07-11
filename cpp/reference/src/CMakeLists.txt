@@ -3,17 +3,22 @@ add_subdirectory(system)
 add_subdirectory(scheduler)
 add_subdirectory(components)
 
-add_executable(roof roof.cpp)
-target_link_libraries(roof PRIVATE
-  components
-  scheduler
-  CLI11_SINGLE)
-if (RASPBERRY)
-  target_link_libraries(roof PUBLIC -static)
-endif()
-if(MSVC)
-  target_compile_options(roof PRIVATE /W4 /WX)
-else()
-  target_compile_options(roof PRIVATE -Wall -Wextra -Wpedantic -Werror)
-endif()
-target_compile_features(roof PRIVATE cxx_std_20)
+function(create_logic name)
+  add_executable(${name} ${ARGN})
+  target_link_libraries(${name} PRIVATE
+    components
+    scheduler
+    CLI11_SINGLE)
+  if (RASPBERRY)
+    target_link_libraries(${name} PUBLIC -static)
+  endif()
+  if(MSVC)
+    target_compile_options(${name} PRIVATE /W4 /WX)
+  else()
+    target_compile_options(${name} PRIVATE -Wall -Wextra -Wpedantic -Werror)
+  endif()
+  target_compile_features(${name} PRIVATE cxx_std_20)
+endfunction()
+
+create_logic(roof roof.cpp)
+create_logic(ground ground.cpp)
