@@ -1,10 +1,5 @@
 #pragma once
 
-#include <cstdint>
-#include <memory>
-#include <string>
-#include <vector>
-
 #include <spdlog/spdlog.h>
 
 #include <linux/i2c-dev.h>
@@ -13,23 +8,29 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 
+#include <cstdint>
+#include <memory>
+#include <span>
+#include <string>
+#include <vector>
+
 namespace HomeAutomation {
 namespace IO {
 
-using ByteVector = std::vector<std::uint8_t>;
+using ByteSpan = std::span<std::uint8_t>;
 
 namespace I2C {
 
 class IRead {
 public:
   virtual ~IRead() {}
-  virtual ByteVector read(std::uint8_t address, std::size_t num_bytes) = 0;
+  virtual void read(std::uint8_t address, ByteSpan data) = 0;
 };
 
 class IWrite {
 public:
   virtual ~IWrite() {}
-  virtual void write(std::uint8_t address, ByteVector const &bytes) = 0;
+  virtual void write(std::uint8_t address, ByteSpan const bytes) = 0;
 };
 
 class IReadWrite : public IRead, public IWrite {
@@ -107,20 +108,18 @@ public:
     }
   }
 
-  ByteVector read(std::uint8_t address, std::size_t num_bytes) override {
+  void read(std::uint8_t address, ByteSpan data) override {
     setAddress(address);
 
     // perform physical I/O
-    auto result = ByteVector(num_bytes);
-    auto rc = ::read(fd, result.data(), result.size());
+    auto rc = ::read(fd, data.data(), data.size());
     if (rc < 0) {
       spdlog::critical("Could not read from i2c bus.");
       // throw exception
     }
-    return result;
   }
 
-  void write(std::uint8_t address, ByteVector const &bytes) override {
+  void write(std::uint8_t address, ByteSpan const bytes) override {
     setAddress(address);
 
     // perform physical I/O
@@ -152,16 +151,14 @@ public:
 
   void open() override { spdlog::info("open()"); }
 
-  ByteVector read(std::uint8_t address, std::size_t num_bytes) override {
+  void read(std::uint8_t address, ByteSpan data) override {
     setAddress(address);
 
     // perform physical I/O
-    auto result = ByteVector(num_bytes);
-    spdlog::info("reading {} bytes", result.size());
-    return result;
+    spdlog::info("reading {} bytes", data.size());
   }
 
-  void write(std::uint8_t address, ByteVector const &bytes) override {
+  void write(std::uint8_t address, ByteSpan const bytes) override {
     setAddress(address);
 
     // perform physical I/O

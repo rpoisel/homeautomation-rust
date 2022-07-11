@@ -4,6 +4,7 @@
 
 #include <bithelpers.hpp>
 
+#include <array>
 #include <cstdint>
 
 namespace HomeAutomation {
@@ -17,14 +18,14 @@ public:
       : address(address), outputs{}, last_outputs(outputs) {}
   virtual void init(IReadWrite *io) override {
     // Port 1 configuration
-    io->write(address, {REGISTER_PORT_1_CONFIGURATION, 0x00});
+    std::array<std::uint8_t, 2> configCmd{REGISTER_PORT_1_CONFIGURATION, 0x00};
+    io->write(address, configCmd);
 
-    io->write(address, {REGISTER_OUTPUT_PORT_1});
-    auto bytes = io->read(address, 1);
-    if (bytes.empty()) {
-      // should not happen
-      return;
-    }
+    std::array<std::uint8_t, 1> register1OutputCmd{REGISTER_OUTPUT_PORT_1};
+    io->write(address, register1OutputCmd);
+
+    std::array<std::uint8_t, 1> bytes{0x00};
+    io->read(address, bytes);
     outputs = BitHelpers::bitflip(bytes[0]); // bits are inverted
   }
 
@@ -43,8 +44,10 @@ public:
       return;
     }
 
-    io->write(address, {REGISTER_OUTPUT_PORT_1,
-                        BitHelpers::bitflip(outputs)}); // bits are inverted
+    // bits are inverted
+    std::array<std::uint8_t, 2> bytes{REGISTER_OUTPUT_PORT_1,
+                                      BitHelpers::bitflip(outputs)};
+    io->write(address, bytes);
 
     last_outputs = outputs;
   }
@@ -69,12 +72,9 @@ public:
   }
 
   virtual void read(HomeAutomation::IO::I2C::IReadWrite *io) override {
-    auto bytes = io->read(address, 1);
+    std::array<std::uint8_t, 1> bytes{0x00};
+    io->read(address, bytes);
 
-    if (bytes.empty()) {
-      // should not happen
-      return;
-    }
     inputs = BitHelpers::bitflip(bytes[0]); // bits are inverted
   }
 
