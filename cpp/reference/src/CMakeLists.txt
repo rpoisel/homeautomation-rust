@@ -8,7 +8,8 @@ function(create_logic name)
   target_link_libraries(${name} PRIVATE
     components
     scheduler
-    CLI11_SINGLE)
+    CLI11_SINGLE
+    ${CONAN_LIBS})
   if (RASPBERRY)
     target_link_libraries(${name} PUBLIC -static)
   endif()

@@ -1,0 +1,5 @@
+[requires]
+paho-mqtt-cpp/1.2.0
+
+[generators]
+cmake
