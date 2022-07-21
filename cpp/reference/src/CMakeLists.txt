@@ -6,10 +6,10 @@ add_subdirectory(components)
 function(create_logic name)
   add_executable(${name} ${ARGN})
   target_link_libraries(${name} PRIVATE
-    components
+    automation
     scheduler
     CLI11_SINGLE
-    ${CONAN_LIBS})
+    mqtt)
   if (RASPBERRY)
     target_link_libraries(${name} PUBLIC -static)
   endif()
