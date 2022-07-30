@@ -83,6 +83,34 @@ private:
   std::uint8_t inputs;
 };
 
+class PCF8574Output : public HomeAutomation::IO::I2C::OutputModule {
+public:
+  PCF8574Output(std::uint8_t address)
+      : address{address}, outputs{}, last_outputs{outputs} {}
+  virtual void init(IReadWrite *io) override {
+    std::array<std::uint8_t, 1> bytes{0x00};
+    io->read(address, bytes);
+    outputs = BitHelpers::bitflip(bytes[0]); // bits are inverted
+  }
+  virtual void write(IReadWrite *io) override {
+    if (outputs == last_outputs) {
+      return;
+    }
+    std::array<std::uint8_t, 1> bytes{
+        BitHelpers::bitflip(outputs)}; // bits are inverted
+    io->write(address, bytes);
+    last_outputs = outputs;
+  }
+  void setOutput(std::uint8_t pos, bool value) {
+    outputs = BitHelpers::bitset(outputs, pos, value);
+  }
+
+private:
+  std::uint8_t address;
+  std::uint8_t outputs;
+  std::uint8_t last_outputs;
+};
+
 } // namespace I2C
 } // namespace IO
 } // namespace HomeAutomation
