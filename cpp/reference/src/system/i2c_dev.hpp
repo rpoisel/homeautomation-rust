@@ -16,7 +16,7 @@ class MAX7311Output : public HomeAutomation::IO::I2C::OutputModule {
 public:
   MAX7311Output(std::uint8_t address)
       : address(address), outputs{}, last_outputs(outputs) {}
-  virtual void init(IReadWrite *io) override {
+  void init(IReadWrite *io) override {
     // Port 1 configuration
     std::array<std::uint8_t, 2> configCmd{REGISTER_PORT_1_CONFIGURATION, 0x00};
     io->write(address, configCmd);
@@ -38,7 +38,7 @@ public:
     return BitHelpers::bitget(outputs, pos);
   }
 
-  virtual void write(HomeAutomation::IO::I2C::IReadWrite *io) override {
+  void write(HomeAutomation::IO::I2C::IReadWrite *io) override {
     // writing is only necessary if there is change in outputs states
     if (outputs == last_outputs) {
       return;
@@ -65,13 +65,13 @@ private:
 class PCF8574Input : public HomeAutomation::IO::I2C::InputModule {
 public:
   PCF8574Input(std::uint8_t address) : address(address), inputs{0x00} {}
-  virtual void init(IReadWrite *io) override { read(io); }
+  void init(IReadWrite *io) override { read(io); }
   std::uint8_t getInputs() const { return inputs; };
   bool getInput(std::uint8_t pos) const {
     return BitHelpers::bitget(inputs, pos);
   }
 
-  virtual void read(HomeAutomation::IO::I2C::IReadWrite *io) override {
+  void read(HomeAutomation::IO::I2C::IReadWrite *io) override {
     std::array<std::uint8_t, 1> bytes{0x00};
     io->read(address, bytes);
 
@@ -87,12 +87,12 @@ class PCF8574Output : public HomeAutomation::IO::I2C::OutputModule {
 public:
   PCF8574Output(std::uint8_t address)
       : address{address}, outputs{}, last_outputs{outputs} {}
-  virtual void init(IReadWrite *io) override {
+  void init(IReadWrite *io) override {
     std::array<std::uint8_t, 1> bytes{0x00};
     io->read(address, bytes);
     outputs = BitHelpers::bitflip(bytes[0]); // bits are inverted
   }
-  virtual void write(IReadWrite *io) override {
+  void write(IReadWrite *io) override {
     if (outputs == last_outputs) {
       return;
     }
