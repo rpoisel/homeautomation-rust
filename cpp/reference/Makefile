@@ -48,7 +48,7 @@ roof:
 
 .PHONY: deploy-roof
 deploy-roof: roof
-	scp -O build.roof/bin/roof root@raspberry-d.lan:/tmp
+	scp -O build.roof/bin/roof root@raspberry-d.lan:/opt
 
 ground-conan: prepare
 	if [ ! -e build.ground ]; then mkdir build.ground; fi
@@ -65,7 +65,7 @@ ground:
 
 .PHONY: deploy-ground
 deploy-ground: ground
-	scp -O build.ground/bin/ground root@raspberry-o.lan:/tmp
+	scp -O build.ground/bin/ground root@raspberry-o.lan:/opt
 
 .PHONY: clean
 clean:
