@@ -15,12 +15,14 @@ struct GV {
     bool stairs_light;
     bool kitchen_light;
     bool charger;
+    bool deck_light;
   } inputs;
 
   struct {
     bool stairs_light;
     bool kitchen_light;
     bool charger;
+    bool deck_light;
   } outputs;
 };
 
@@ -44,6 +46,10 @@ public:
     if (charger_trigger.execute(gv.inputs.charger)) {
       gv.outputs.charger = charger.toggle();
     }
+
+    if (deck_trigger.execute(gv.inputs.deck_light)) {
+      gv.outputs.deck_light = deck_light.toggle();
+    }
   }
 
 private:
@@ -53,9 +59,11 @@ private:
   HomeAutomation::Components::R_TRIG stairs_light_trigger;
   HomeAutomation::Components::R_TRIG kitchen_light_trigger;
   HomeAutomation::Components::R_TRIG charger_trigger;
+  HomeAutomation::Components::R_TRIG deck_trigger;
   HomeAutomation::Components::Light stairs_light;
   HomeAutomation::Components::Light kitchen_light;
   HomeAutomation::Components::Light charger;
+  HomeAutomation::Components::Light deck_light;
 };
 
 int main(int argc, char *argv[]) {
@@ -103,6 +111,7 @@ int main(int argc, char *argv[]) {
                        gv.inputs.stairs_light = pcf8574Input_38.getInput(1);
                        gv.inputs.kitchen_light = pcf8574Input_38.getInput(2);
                        gv.inputs.charger = pcf8574Input_38.getInput(3);
+                       gv.inputs.deck_light = pcf8574Input_38.getInput(4);
                      },
                  .after =
                      [i2c_bus, &gv, &pcf8574Output_20]() {
@@ -111,6 +120,7 @@ int main(int argc, char *argv[]) {
                        pcf8574Output_20.setOutput(1, gv.outputs.stairs_light);
                        pcf8574Output_20.setOutput(2, gv.outputs.stairs_light);
                        pcf8574Output_20.setOutput(3, gv.outputs.kitchen_light);
+                       pcf8574Output_20.setOutput(4, gv.outputs.deck_light);
 
                        // perform real I/O
                        i2c_bus->writeOutputs();
